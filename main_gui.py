@@ -2,8 +2,7 @@ import sys
 import yt_dlp
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel, QHBoxLayout, QLineEdit, QPushButton
-from PyQt5.QtCore import Qt
-
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
 
 ydl_opts = {'format': 'bestvideo+bestaudio/best',
             'ffmpeg_location': 'C:/ffmpeg/bin',
@@ -52,6 +51,11 @@ class MainWindow(QMainWindow):
         self.textbox1.clear()
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
+
+
+
+
+
 
 def main():
     app = QApplication(sys.argv)
