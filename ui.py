@@ -16,10 +16,9 @@ class MainWindow(QMainWindow):
 
         self.initUI()
 
-
         self.download_manager.progressSignal.connect(self.progressBar.setValue)
         self.download_manager.statusSignal.connect(self.statusLabel.setText)
-
+        self.download_manager.finishedSignal.connect(self.finished_download)
 
         #tell the thread what to do when it starts
         self.background_thread.started.connect(self.download_manager.download)
@@ -27,14 +26,18 @@ class MainWindow(QMainWindow):
         #working with the backend
         self.download_button.clicked.connect(self.start_download)
 
+
     def start_download(self):
-        url = self.textbox1.text()
+        url = self.textbox1.text().strip()
         self.download_manager.url = url
-        if not url:
-            QMessageBox.critical(self, "Error", "Please enter a valid URL")
-        else:
-            self.download_button.setEnabled(False)
-            self.background_thread.start()
+        self.download_button.setEnabled(False)
+        self.background_thread.start()
+
+    def finished_download(self):
+        QMessageBox.information(self, "Success", "Download Completed")
+        self.textbox1.clear()
+        self.download_button.setEnabled(True)
+        self.background_thread.quit()
 
     def initUI(self):
         #defining the UI's characteristics
