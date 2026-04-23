@@ -2,6 +2,8 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel, QHBoxLayout, QLineEdit, \
     QPushButton, QProgressBar, QMessageBox, QGridLayout, QGroupBox, QFileDialog
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject
+
+from constants import UI_MESSAGES
 from downloader import downloader
 from pathlib import Path
 
@@ -23,15 +25,28 @@ class MainWindow(QMainWindow):
         self.download_manager.finishedSignal.connect(self.finished_download)
         self.download_dir_label.setText(str(self.download_manager.downloads_folder))
         self.download_dir_button.clicked.connect(self.browse_folders)
-
+        self.download_manager.errorSignal.connect(self.handle_errors)
         #tell the thread what to do when it starts
         self.background_thread.started.connect(self.download_manager.download)
 
         #working with the backend
         self.download_button.clicked.connect(self.start_download)
+        self.textbox1.textChanged.connect(lambda: self.textbox1.setStyleSheet("color: #333333;"))
+    def resetUI(self):
+        self.textbox1.clear()
+        self.download_button.setEnabled(True)
+        self.progressBar.hide()
+        self.statusLabel.clear()
+        self.background_thread.quit()
 
     def start_download(self):
         url = self.textbox1.text().strip()
+
+        if not url:
+            self.textbox1.setPlaceholderText("Please enter a Youtube Link")
+            self.textbox1.setStyleSheet("color: #ff0000;")
+            return
+
         self.download_manager.url = url
         self.download_button.setEnabled(False)
         self.background_thread.start()
@@ -39,9 +54,7 @@ class MainWindow(QMainWindow):
 
     def finished_download(self):
         QMessageBox.information(self, "Success", "Download Completed")
-        self.textbox1.clear()
-        self.download_button.setEnabled(True)
-        self.background_thread.quit()
+        self.resetUI()
 
     def browse_folders(self):
         selected_folder = QFileDialog.getExistingDirectory(self, "Select Folder")
@@ -51,6 +64,21 @@ class MainWindow(QMainWindow):
                 selected_folder = selected_folder / "Youtube Downloader"
             self.download_dir_label.setText(str(selected_folder))
             self.download_manager.downloads_folder = selected_folder
+
+    def handle_errors(self, error):
+        if "is not a valid URL" in error or "generic" in error:
+            return
+
+        error = str(error).lower()
+        found_key = "default"
+        for key in UI_MESSAGES:
+            if key in error:
+                found_key = key
+                break
+
+        icon, title, description = UI_MESSAGES[found_key]
+        QMessageBox.critical(self, title, f"{description}\n\n {error}")
+        self.resetUI()
 
     def initUI(self):
         #defining the UI's main characteristics
@@ -162,6 +190,27 @@ class MainWindow(QMainWindow):
             QProgressBar::chunk {
                 background-color: #2ecc71;
                 border-radius: 4px;
+            }
+            QMessageBox {
+            background-color: #ffffff;
+            border: 1px solid #dcdcdc;
+            }
+            QMessageBox QLabel {
+            color: #333333;
+            font-size: 13px;
+            font-weight: 500;
+            padding-left: 10px;
+            }
+            QMessageBox QPushButton {
+            background-color: #f0f0f0;
+            border: 1px solid #dcdcdc;
+            border-radius: 4px;
+            padding: 6px 20px;
+            min-width: 70px;
+            min-height: 24px;          
+            }
+            QMessageBox QPushButton:hover {
+            background-color: #e5e5e5;
             }
         """
     def group_style(self):

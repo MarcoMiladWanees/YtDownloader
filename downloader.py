@@ -8,6 +8,7 @@ class downloader(QObject):
     progressSignal = pyqtSignal(int)
     statusSignal = pyqtSignal(str)
     finishedSignal = pyqtSignal()
+    errorSignal = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
@@ -26,19 +27,25 @@ class downloader(QObject):
             status = f"{remaining_time: >10} remaining | {speed: >10} | {total_downloaded: >8.2f}/{total_size}"
             self.statusSignal.emit(status)
 
-    def download(self):
-        self.downloads_folder.mkdir(parents=True, exist_ok=True)
-        self.download_path = str(self.downloads_folder/ "%(title)s.%(ext)s")
-        ydl_opts = {'format': 'bestvideo+bestaudio/best',
-                    'ffmpeg_location': 'C:/ffmpeg/bin',
-                    # 'quiet': True,
-                    # 'no_warnings': True,
-                    'noplaylist': False,
-                    'outtmpl': self.download_path,
-                    'merge_output_format': 'mp4',
-                    "progress_hooks": [self.yt_progress] }
+    def check(self):
+        pass
 
-        if self.url:
+    def download(self):
+        try:
+            self.downloads_folder.mkdir(parents=True, exist_ok=True)
+            self.download_path = str(self.downloads_folder/ "%(title)s.%(ext)s")
+            ydl_opts = {'format': 'bestvideo+bestaudio/best',
+                        'ffmpeg_location': 'C:/ffmpeg/bin',
+                        # 'quiet': True,
+                        # 'no_warnings': True,
+                        'noplaylist': False,
+                        'outtmpl': self.download_path,
+                        'merge_output_format': 'mp4',
+                        "progress_hooks": [self.yt_progress] }
+
+
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([self.url])
             self.finishedSignal.emit()
+        except Exception as e:
+            self.errorSignal.emit(str(e))
