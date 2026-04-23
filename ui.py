@@ -1,8 +1,9 @@
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel, QHBoxLayout, QLineEdit, \
-    QPushButton, QProgressBar, QMessageBox, QGridLayout, QGroupBox
+    QPushButton, QProgressBar, QMessageBox, QGridLayout, QGroupBox, QFileDialog
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject
 from downloader import downloader
+from pathlib import Path
 
 class MainWindow(QMainWindow):
 
@@ -21,6 +22,8 @@ class MainWindow(QMainWindow):
         self.download_manager.statusSignal.connect(self.statusLabel.setText)
         self.download_manager.finishedSignal.connect(self.finished_download)
         self.download_dir_label.setText(str(self.download_manager.downloads_folder))
+        self.download_dir_button.clicked.connect(self.browse_folders)
+
         #tell the thread what to do when it starts
         self.background_thread.started.connect(self.download_manager.download)
 
@@ -39,6 +42,15 @@ class MainWindow(QMainWindow):
         self.textbox1.clear()
         self.download_button.setEnabled(True)
         self.background_thread.quit()
+
+    def browse_folders(self):
+        selected_folder = QFileDialog.getExistingDirectory(self, "Select Folder")
+        if selected_folder:
+            selected_folder = Path(selected_folder)
+            if selected_folder.name != "Youtube Downloader":
+                selected_folder = selected_folder / "Youtube Downloader"
+            self.download_dir_label.setText(str(selected_folder))
+            self.download_manager.downloads_folder = selected_folder
 
     def initUI(self):
         #defining the UI's main characteristics

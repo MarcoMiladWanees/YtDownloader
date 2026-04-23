@@ -28,7 +28,7 @@ class downloader(QObject):
 
     def download(self):
         self.downloads_folder.mkdir(parents=True, exist_ok=True)
-        self.download_path = str(self.downloads_folder / "%(title)s.%(ext)s")
+        self.download_path = str(self.downloads_folder/ "%(title)s.%(ext)s")
         ydl_opts = {'format': 'bestvideo+bestaudio/best',
                     'ffmpeg_location': 'C:/ffmpeg/bin',
                     # 'quiet': True,
