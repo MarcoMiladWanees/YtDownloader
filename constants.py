@@ -23,3 +23,22 @@ UI_MESSAGES = {
 }
 
 
+class UIConfig:
+    # Window
+    WINDOW_WIDTH = 850
+    WINDOW_HEIGHT = 550
+
+    # download widgets
+    URL_BAR_WIDTH = 796
+    DOWNLOAD_WIDGETS_HEIGHT = 35
+    DOWNLOAD_WIDGETS_WIDTH = 150
+
+    # Spacing
+    MARGIN = 15
+    SPACING = 10
+
+    # Colors
+    PRIMARY_COLOR = "#2ecc71"
+    BORDER_COLOR = "#dcdcdc"
+    BG_COLOR = "#f9f9f9"
+
